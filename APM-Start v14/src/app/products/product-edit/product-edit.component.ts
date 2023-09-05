@@ -1,9 +1,8 @@
 import { Component } from '@angular/core';
-
 import { MessageService } from '../../messages/message.service';
-
 import { Product } from '../product';
 import { ProductService } from '../product.service';
+import {ActivatedRoute, Router} from "@angular/router";
 
 @Component({
   templateUrl: './product-edit.component.html',
@@ -16,8 +15,23 @@ export class ProductEditComponent {
   product: Product | null = null;
 
   constructor(private productService: ProductService,
-    private messageService: MessageService) { }
+    private messageService: MessageService,
+    private route: ActivatedRoute,
+    private router: Router) { }
 
+  ngOnInit(): void {
+    // const id = this.route.snapshot.paramMap.get('id');
+    // if (id) {
+    //   this.getProduct(+id);
+    // }
+    this.route.paramMap.subscribe(
+        params => {
+            // @ts-ignore
+          const id = +params.get("id")
+            this.getProduct(id);
+          }
+    );
+  }
   getProduct(id: number): void {
     this.productService.getProduct(id).subscribe({
       next: product => this.onProductRetrieved(product),
@@ -75,7 +89,7 @@ export class ProductEditComponent {
     if (message) {
       this.messageService.addMessage(message);
     }
-
     // Navigate back to the product list
+    this.router.navigate(['/products'])
   }
 }
