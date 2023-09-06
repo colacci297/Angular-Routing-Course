@@ -7,13 +7,19 @@ import { Product } from '../product';
   templateUrl: './product-edit-tags.component.html'
 })
 export class ProductEditTagsComponent implements OnInit {
-  errorMessage = '';
+
   newTags = '';
-  product = { id: 1, category: 'test', tags: ['test'] };
+  errorMessage: string | undefined;
+  product: Product | undefined;
 
-  constructor(private route: ActivatedRoute) { }
+constructor(private route: ActivatedRoute) {
 
+}
   ngOnInit(): void {
+    this.route.parent?.data.subscribe(data => {
+      this.product = data['product'];
+      console.log(this.product, ' this.product');
+    })
   }
 
   // Add the defined tags

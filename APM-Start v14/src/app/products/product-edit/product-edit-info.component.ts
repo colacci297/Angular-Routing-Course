@@ -3,6 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { NgForm } from '@angular/forms';
 
 import { Product } from '../product';
+import {error} from "@angular/compiler-cli/src/transformers/util";
 
 @Component({
   templateUrl: './product-edit-info.component.html'
@@ -10,11 +11,13 @@ import { Product } from '../product';
 export class ProductEditInfoComponent implements OnInit {
   @ViewChild(NgForm) productForm?: NgForm;
 
-  errorMessage = '';
-  product = { id: 1, productName: 'test', productCode: 'test', description: 'test' };
-
-  constructor(private route: ActivatedRoute) { }
+  errorMessage: string | undefined;
+  product: Product | undefined;
+  constructor(private route: ActivatedRoute){  }
 
   ngOnInit(): void {
+    this.route.parent?.data.subscribe(data => {
+      this.product = data['product'].product;
+    })
   }
 }

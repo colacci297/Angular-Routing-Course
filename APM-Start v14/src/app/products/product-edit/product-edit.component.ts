@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
-import { MessageService } from '../../messages/message.service';
-import { Product } from '../product';
-import { ProductService } from '../product.service';
+import {Component} from '@angular/core';
+import {MessageService} from '../../messages/message.service';
+import {Product, ProductResolved} from '../product';
+import {ProductService} from '../product.service';
 import {ActivatedRoute, Router} from "@angular/router";
 
 @Component({
@@ -10,34 +10,38 @@ import {ActivatedRoute, Router} from "@angular/router";
 })
 export class ProductEditComponent {
   pageTitle = 'Product Edit';
-  errorMessage = '';
+  errorMessage: string | undefined = '';
 
   product: Product | null = null;
+  private dataIsValid: { [key: string]: boolean } = {};
+
 
   constructor(private productService: ProductService,
-    private messageService: MessageService,
-    private route: ActivatedRoute,
-    private router: Router) { }
+              private messageService: MessageService,
+              private route: ActivatedRoute,
+              private router: Router) {
+  }
 
   ngOnInit(): void {
     // const id = this.route.snapshot.paramMap.get('id');
     // if (id) {
     //   this.getProduct(+id);
     // }
-    this.route.paramMap.subscribe(
-        params => {
-            // @ts-ignore
-          const id = +params.get("id")
-            this.getProduct(id);
-          }
-    );
+    this.route.data.subscribe(data => {
+      const resolveData: ProductResolved = data['product'];
+      this.errorMessage = resolveData.error;
+      if (resolveData.product) {
+        this.onProductRetrieved(resolveData.product);
+      }
+    })
   }
-  getProduct(id: number): void {
-    this.productService.getProduct(id).subscribe({
-      next: product => this.onProductRetrieved(product),
-      error: err => this.errorMessage = err
-    });
-  }
+
+  // getProduct(id: number): void {
+  //   this.productService.getProduct(id).subscribe({
+  //     next: product => this.onProductRetrieved(product),
+  //     error: err => this.errorMessage = err
+  //   });
+  // }
 
   onProductRetrieved(product: Product): void {
     this.product = product;
@@ -54,17 +58,50 @@ export class ProductEditComponent {
   }
 
   deleteProduct(): void {
-      if (!this.product || !this.product.id) {
-        // Don't delete, it was never saved.
-        this.onSaveComplete(`${this.product?.productName} was deleted`);
-      } else {
-        if (confirm(`Really delete the product: ${this.product.productName}?`)) {
-          this.productService.deleteProduct(this.product.id).subscribe({
-            next: () => this.onSaveComplete(`${this.product?.productName} was deleted`),
-            error: err => this.errorMessage = err
-          });
-        }
+    if (!this.product || !this.product.id) {
+      // Don't delete, it was never saved.
+      this.onSaveComplete(`${this.product?.productName} was deleted`);
+    } else {
+      if (confirm(`Really delete the product: ${this.product.productName}?`)) {
+        this.productService.deleteProduct(this.product.id).subscribe({
+          next: () => this.onSaveComplete(`${this.product?.productName} was deleted`),
+          error: err => this.errorMessage = err
+        });
       }
+    }
+  }
+
+  isValid(path?: string): boolean {
+    this.validate();
+    if (path) {
+      return this.dataIsValid[path];
+    }
+    return (this.dataIsValid &&
+      Object.keys(this.dataIsValid).every(d => this.dataIsValid[d] === true));
+  }
+
+  validate(): void {
+    // Clear the validation object
+    this.dataIsValid = {};
+
+    // 'info' tab
+    if (this.product &&
+      this.product.productName &&
+      this.product.productName.length >= 3 &&
+      this.product.productCode) {
+      this.dataIsValid['info'] = true;
+    } else {
+      this.dataIsValid['info'] = false;
+    }
+
+    // 'tags' tab
+    if (this.product &&
+      this.product.category &&
+      this.product.category.length >= 3) {
+      this.dataIsValid['tags'] = true;
+    } else {
+      this.dataIsValid['tags'] = false;
+    }
   }
 
   saveProduct(): void {

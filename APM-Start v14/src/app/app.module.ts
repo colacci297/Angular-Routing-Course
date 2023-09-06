@@ -16,13 +16,15 @@ import { UserModule } from './user/user.module';
 import { MessageModule } from './messages/message.module';
 import {AppRoutingModule} from "./app-routing.module";
 import {ProductRoutingModule} from "./products/product-routing.module";
+import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 
 @NgModule({
   imports: [
     BrowserModule,
     HttpClientModule,
     AppRoutingModule,
-    InMemoryWebApiModule.forRoot(ProductData, { delay: 1000 }),
+    BrowserAnimationsModule,
+    InMemoryWebApiModule.forRoot(ProductData, { delay: 2000 }),
     ProductModule,
     UserModule,
     MessageModule
