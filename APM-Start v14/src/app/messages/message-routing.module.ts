@@ -5,7 +5,7 @@ import {MessageComponent} from "./message.component";
 
 export const routes: Routes = [
   {
-    path: '',
+    path: 'messages',
     component: MessageComponent,
     outlet: 'popup'
   }
